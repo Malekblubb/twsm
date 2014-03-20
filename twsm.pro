@@ -13,7 +13,7 @@ TEMPLATE = app
 
 
 QMAKE_CXX = clang++
-QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS += -std=c++0x -O3
 
 INCLUDEPATH +=	include \
 		external/mlk/include \
