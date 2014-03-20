@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1083</width>
-    <height>640</height>
+    <height>658</height>
    </rect>
   </property>
   <property name="palette">
@@ -1034,9 +1034,9 @@ background-color:#fff;
       <property name="geometry">
        <rect>
         <x>40</x>
-        <y>30</y>
-        <width>631</width>
-        <height>501</height>
+        <y>60</y>
+        <width>791</width>
+        <height>451</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -1079,7 +1079,7 @@ background-color:#50AEFA;
        <bool>true</bool>
       </property>
       <attribute name="horizontalHeaderDefaultSectionSize">
-       <number>125</number>
+       <number>150</number>
       </attribute>
       <attribute name="verticalHeaderVisible">
        <bool>false</bool>
@@ -1118,10 +1118,10 @@ background-color:#50AEFA;
      <widget class="QPushButton" name="m_pb_srvb_refresh">
       <property name="geometry">
        <rect>
-        <x>710</x>
-        <y>90</y>
+        <x>50</x>
+        <y>10</y>
         <width>81</width>
-        <height>51</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="palette">
@@ -1573,6 +1573,49 @@ background-color:#fff;
       </property>
       <property name="flat">
        <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>520</y>
+        <width>47</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color:#7b7b7b;</string>
+      </property>
+      <property name="text">
+       <string>Status:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="m_lb_srvb_status">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>520</y>
+        <width>411</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+        <italic>true</italic>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color:#7b7b7b;</string>
+      </property>
+      <property name="text">
+       <string>none</string>
       </property>
      </widget>
     </widget>

@@ -49,6 +49,7 @@ namespace twsm
 			// reset ui
 			m_ui.m_tw_srvb_list->clearContents();
 			m_ui.m_tw_srvb_list->setRowCount(0);
+			m_ui.m_lb_srvb_status->setText("Refreshing masters...");
 
 			// request masterlist
 			m_refreshing_masters = true;
@@ -80,6 +81,7 @@ namespace twsm
 
 			auto ips(m_masters.get_list());
 			mlk::lout("server_browser") << "refreshed masters. got " << ips.size() << " ips.";
+			m_ui.m_lb_srvb_status->setText(QString{"Refreshed masters, processing %1 %2"}.arg(ips.size()).arg("servers..."));
 			if(ips.empty())
 				return;
 
@@ -117,6 +119,7 @@ namespace twsm
 			}
 
 			mlk::lout("server_browser") << "ui took " << m_stopwatch.elapsed_time() - tm << " ms.";
+			m_ui.m_lb_srvb_status->setText("Servers refreshed.");
 		}
 	};
 }
