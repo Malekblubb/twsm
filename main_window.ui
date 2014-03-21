@@ -1052,10 +1052,17 @@ QTableWidget
 background-color: rgba(255, 255, 255, 0);
 }
 
+QTableWidget:item
+{
+color:#a6a6a6;
+}
 QTableWidget:item::selected
 {
 background-color:#50AEFA;
-}</string>
+color:#fff;
+}
+
+</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
