@@ -100,6 +100,7 @@ namespace twsm
 			auto tm(m_stopwatch.elapsed_time());
 			mlk::lout("server_browser") << "refreshed servers. (twl) processed " << m_servers.get_infos().size() << " servers in " << tm << "ms.";
 
+			m_ui.m_tw_srvb_list->setSortingEnabled(false);
 			for(auto& a : m_servers.get_infos())
 			{
 				// received info from a server
@@ -118,8 +119,9 @@ namespace twsm
 				m_ui.m_tw_srvb_list->setItem(m_ui.m_tw_srvb_list->rowCount() - 1, 4, ping);
 			}
 
-			mlk::lout("server_browser") << "ui took " << m_stopwatch.elapsed_time() - tm << " ms.";
+			m_ui.m_tw_srvb_list->setSortingEnabled(true);
 			m_ui.m_lb_srvb_status->setText("Servers refreshed.");
+			mlk::lout("server_browser") << "ui took " << m_stopwatch.elapsed_time() - tm << " ms.";
 		}
 	};
 }
