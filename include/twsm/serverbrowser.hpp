@@ -103,8 +103,6 @@ namespace twsm
 			m_ui.m_tw_srvb_list->setSortingEnabled(false);
 			for(auto& a : m_servers.get_infos())
 			{
-				// received info from a server
-
 				m_ui.m_tw_srvb_list->insertRow(m_ui.m_tw_srvb_list->rowCount());
 				auto* name(new QTableWidgetItem{a.name().c_str()});
 				auto* type(new QTableWidgetItem{a.gametype().c_str()});
