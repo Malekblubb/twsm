@@ -13,7 +13,7 @@ TEMPLATE = app
 
 
 QMAKE_CXX = clang++
-QMAKE_CXXFLAGS += -std=c++0x -O3
+QMAKE_CXXFLAGS += -Wno-c++1y-extensions -std=c++0x -O3
 
 INCLUDEPATH +=	include \
 		external/mlk/include \
@@ -22,7 +22,8 @@ INCLUDEPATH +=	include \
 SOURCES += main.cpp
 
 HEADERS  += include/twsm/main_window.hpp \
-	    include/twsm/serverbrowser.hpp
+	    include/twsm/serverbrowser.hpp \
+	    include/twsm/econ.hpp
 
 FORMS    += main_window.ui
 
