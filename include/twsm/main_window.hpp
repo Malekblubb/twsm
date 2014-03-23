@@ -3,8 +3,8 @@
 // See LICENSE for more information.
 //
 
-#ifndef TWSM_MAIN_WINDOW
-#define TWSM_MAIN_WINDOW
+#ifndef TWSM_MAIN_WINDOW_HPP
+#define TWSM_MAIN_WINDOW_HPP
 
 
 #include "econ.hpp"
@@ -70,4 +70,4 @@ namespace twsm
 	};
 }
 
-#endif // TWSM_MAIN_WINDOW
+#endif // TWSM_MAIN_WINDOW_HPP
