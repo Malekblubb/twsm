@@ -1,5 +1,7 @@
-<!DOCTYPE RCC><RCC version="1.0">
+<RCC>
     <qresource prefix="/">
         <file>data/twsm.png</file>
+        <file>data/arrow8.png</file>
+        <file>data/arrow_up8.png</file>
     </qresource>
 </RCC>
