@@ -14,6 +14,7 @@
 
 #include <twl/network/network.hpp>
 
+#include <QObject>
 #include <QTableWidgetItem>
 
 
@@ -22,8 +23,10 @@ namespace Ui
 
 namespace twsm
 {
-	class server_browser
+	class server_browser : public QObject
 	{
+		Q_OBJECT
+
 		Ui::main_window& m_ui;
 
 		twl::master_server m_masters;
@@ -36,7 +39,7 @@ namespace twsm
 	public:
 		server_browser(Ui::main_window& ui) :
 			m_ui{ui}
-		{this->init();}
+		{ }
 
 		void update()
 		{
@@ -44,19 +47,6 @@ namespace twsm
 			m_servers.update();
 		}
 
-		void refresh()
-		{
-			// reset ui
-			m_ui.m_tw_srvb_list->clearContents();
-			m_ui.m_tw_srvb_list->setRowCount(0);
-			m_ui.m_lb_srvb_status->setText("Refreshing masters...");
-
-			// request masterlist
-			m_refreshing_masters = true;
-			m_masters.request_list();
-		}
-
-	private:
 		void init()
 		{
 			mlk::lout("server_browser", true) << "init. settings default masters. setting up events.";
@@ -70,8 +60,25 @@ namespace twsm
 			// setup events
 			m_masters.on_finish = [this]{this->masters_finished();};
 			m_servers.on_finish = [this]{this->servers_finished();};
+
+			// ui events
+			QObject::connect(m_ui.m_pb_srvb_refresh, SIGNAL(clicked()), this, SLOT(refresh()));
 		}
 
+	public slots:
+		void refresh()
+		{
+			// reset ui
+			m_ui.m_tw_srvb_list->clearContents();
+			m_ui.m_tw_srvb_list->setRowCount(0);
+			m_ui.m_lb_srvb_status->setText("Refreshing masters...");
+
+			// request masterlist
+			m_refreshing_masters = true;
+			m_masters.request_list();
+		}
+
+	private:
 		void masters_finished()
 		{
 			// master refresh finished
