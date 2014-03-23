@@ -7,6 +7,7 @@
 #define TWSM_MAIN_WINDOW
 
 
+#include "econ.hpp"
 #include "serverbrowser.hpp"
 #include "ui_main_window.h"
 
@@ -27,6 +28,7 @@ namespace twsm
 		Ui::main_window* m_ui{new Ui::main_window};
 
 		server_browser m_srvbrowser{*m_ui};
+		econ m_econ{*m_ui};
 
 		QTimer m_updatetimer;
 
@@ -44,6 +46,10 @@ namespace twsm
 			// setup ui
 			m_ui->setupUi(this);
 
+			// setup components
+			m_srvbrowser.init();
+			m_econ.init();
+
 			// setup timer
 			m_updatetimer.start(0);
 			this->connect(&m_updatetimer, SIGNAL(timeout()), this, SLOT(update()));
@@ -53,16 +59,13 @@ namespace twsm
 		void update()
 		{
 			m_srvbrowser.update();
+			m_econ.update();
 		}
 
+		// menu
 		void on_m_tw_menu_itemSelectionChanged()
 		{
 			m_ui->m_sw_main->setCurrentIndex(m_ui->m_tw_menu->currentIndex().row() / 2);
-		}
-
-		void on_m_pb_srvb_refresh_clicked()
-		{
-			m_srvbrowser.refresh();
 		}
 	};
 }
