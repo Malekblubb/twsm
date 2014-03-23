@@ -16,8 +16,8 @@ QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += -Wno-c++1y-extensions -std=c++0x -O3
 
 INCLUDEPATH +=	include \
-		external/mlk/include \
-		external/twl/include
+		../external/mlk/include \
+		../external/twl/include
 
 SOURCES += main.cpp
 
