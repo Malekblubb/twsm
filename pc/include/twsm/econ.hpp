@@ -61,7 +61,7 @@ namespace twsm
 
 			// connected, client needs login
 			if(iter != std::end(m_clients))
-			{std::cout << iter->second.connected() << " : " << iter->second.logged_in() << std::endl;
+			{
 				if(!iter->second.connected())
 					iter->second.connect(addr);
 
@@ -115,7 +115,6 @@ namespace twsm
 	private:
 		void _on_connection(mlk::uint id)
 		{
-
 			for(auto i(1); i < m_ui.m_cb_ec_servers->count(); ++i)
 				if(m_ui.m_cb_ec_servers->itemData(i).toInt() == static_cast<int>(id))
 				{
@@ -128,13 +127,11 @@ namespace twsm
 			// new connection
 			m_ui.m_cb_ec_servers->addItem(m_clients[id].address().to_string().c_str(), id);
 			m_ui.m_cb_ec_servers->setCurrentIndex(m_ui.m_cb_ec_servers->count() - 1);
-
-			std::cout << "connection on id " << id << std::endl;
 		}
 
 		void _on_login(mlk::uint id)
 		{
-			std::cout << "login on id " << id << std::endl;
+
 		}
 
 	private slots:
