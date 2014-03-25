@@ -1,3 +1,6 @@
+#Application
+*build*/
+
 #logs
 *log*.*
 *.log*
