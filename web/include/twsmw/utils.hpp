@@ -8,6 +8,9 @@
 
 
 #include <Wt/WEvent>
+#include <Wt/WObject>
+
+#include <functional>
 
 
 namespace twsmw
@@ -16,6 +19,11 @@ namespace twsmw
 	template<typename Signal_Type, typename Func_To>
 	void connect(Wt::EventSignal<Signal_Type>& signal, Func_To&& to)
 	{signal.connect(std::bind(to));}
+
+	// memfn
+	template<typename Signal_Type, typename Some_Type, typename Memfn_Ret, typename Memfn_Class>
+	void connect(Wt::EventSignal<Signal_Type>& signal, Some_Type* t, Memfn_Ret(Memfn_Class::*ptr)())
+	{signal.connect(t, ptr);}
 }
 
 
