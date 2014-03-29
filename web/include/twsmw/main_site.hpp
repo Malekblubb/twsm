@@ -9,6 +9,7 @@
 
 #include "header.hpp"
 #include "navigation_bar.hpp"
+#include "serverbrowser.hpp"
 #include "site_factory.hpp"
 #include "site_home.hpp"
 #include "site_serverbrowser.hpp"
@@ -26,13 +27,16 @@ namespace twsmw
 	{
 		Wt::WStackedWidget m_mainwidget;
 
-		// site factory
+		// site factory, sites
 		site_factory m_sitefactory{m_mainwidget};
+		mlk::sptr<site_serverbrowser> m_srvbrowser_site;
 
-		// components (ctor order is important)
+		// ui components (ctor order is important)
 		navigation_bar<main_site> m_navbar{*this};
 		header<main_site> m_header{*this};
 
+		// workers
+		serverbrowser<main_site> m_srvbrowser{*this};
 
 		// update timer
 		Wt::WTimer m_updatetimer;
@@ -43,8 +47,17 @@ namespace twsmw
 		{this->init();}
 
 
+		// getters
 		Wt::WStackedWidget& mainwidget() noexcept
 		{return m_mainwidget;}
+
+		auto srvbrowser_site() noexcept
+		-> decltype(m_srvbrowser_site)&
+		{return m_srvbrowser_site;}
+
+		auto srvbrowser() noexcept
+		-> decltype(m_srvbrowser)&
+		{return m_srvbrowser;}
 
 
 	private:
@@ -54,14 +67,14 @@ namespace twsmw
 
 			// construct main sites
 			m_sitefactory.create_site<site_home>();
-			m_sitefactory.create_site<site_serverbrowser>();
+			m_srvbrowser_site = m_sitefactory.create_site<site_serverbrowser>(m_srvbrowser);
 			m_mainwidget.setCurrentIndex(0);
 			this->root()->addWidget(&m_mainwidget);
 
 
 			// setup timer
-			m_updatetimer.setInterval(10);
-//			m_updatetimer.start();
+			m_updatetimer.setInterval(0);
+			m_updatetimer.start();
 			connect(m_updatetimer.timeout(), this, &main_site::update);
 		}
 
@@ -77,7 +90,7 @@ namespace twsmw
 
 		void update()
 		{
-//			std::cout << "update" << std::endl;
+			m_srvbrowser.update();
 		}
 	};
 }

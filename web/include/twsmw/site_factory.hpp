@@ -27,12 +27,13 @@ namespace twsmw
 			m_parent{parent}
 		{ }
 
-		template<typename Site_Type>
-		void create_site()
+		template<typename Site_Type, typename... Args>
+		mlk::sptr<Site_Type> create_site(Args&&... args)
 		{
-			auto ptr(std::make_shared<Site_Type>(m_parent));
+			auto ptr(std::make_shared<Site_Type>(m_parent, std::forward<Args>(args)...));
 			ptr->construct_site();
 			m_sites.emplace_back(ptr);
+			return ptr;
 		}
 	};
 }
