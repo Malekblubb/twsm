@@ -49,7 +49,7 @@ namespace twsm
 
 		void init()
 		{
-			mlk::lout("server_browser", true) << "init. settings default masters. setting up events.";
+			mlk::lout("server_browser", true) << "init. setting default masters. setting up events.";
 
 			// setup default masters
 			m_masters.add_master({"master1.teeworlds.com:8300"});
