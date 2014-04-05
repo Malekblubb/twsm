@@ -88,9 +88,13 @@ namespace twsm
 
 			auto ips(m_masters.get_list());
 			mlk::lout("server_browser") << "refreshed masters. got " << ips.size() << " ips.";
-			m_ui.m_lb_srvb_status->setText(QString{"Refreshed masters, processing %1 servers..."}.arg(ips.size()));
 			if(ips.empty())
+			{
+				m_ui.m_lb_srvb_status->setText("Got no servers from masters. Stopping refreshing.");
 				return;
+			}
+
+			m_ui.m_lb_srvb_status->setText(QString{"Refreshed masters, processing %1 servers..."}.arg(ips.size()));
 
 			// make ready for server refreshing
 			m_servers.reset();
