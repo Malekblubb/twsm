@@ -8,6 +8,7 @@
 
 
 #include "econ.hpp"
+#include "popup_manager.hpp"
 #include "serverbrowser.hpp"
 #include "ui_main_window.h"
 
@@ -27,8 +28,10 @@ namespace twsm
 
 		Ui::main_window* m_ui{new Ui::main_window};
 
-		server_browser m_srvbrowser{*m_ui};
-		econ m_econ{*m_ui};
+		popup_manager m_popupmgr{*this};
+
+		server_browser m_srvbrowser{*m_ui, m_popupmgr};
+		econ m_econ{*m_ui, m_popupmgr};
 
 		QTimer m_updatetimer;
 
@@ -39,6 +42,18 @@ namespace twsm
 
 		~main_window()
 		{delete m_ui;}
+
+		Ui::main_window& ui() noexcept
+		{return *m_ui;}
+
+		popup_manager& popupmgr() noexcept
+		{return m_popupmgr;}
+
+		server_browser& srvbrowser() noexcept
+		{return m_srvbrowser;}
+
+		econ& econsole() noexcept
+		{return m_econ;}
 
 	private:
 		void init()
@@ -58,6 +73,7 @@ namespace twsm
 	private slots:
 		void update()
 		{
+			m_popupmgr.update();
 			m_srvbrowser.update();
 			m_econ.update();
 		}
