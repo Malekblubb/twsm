@@ -23,7 +23,9 @@ SOURCES += main.cpp
 
 HEADERS  += include/twsm/main_window.hpp \
 	    include/twsm/serverbrowser.hpp \
-	    include/twsm/econ.hpp
+	    include/twsm/econ.hpp \
+	    include/twsm/popup.hpp \
+	    include/twsm/popup_manager.hpp
 
 FORMS    += main_window.ui
 
