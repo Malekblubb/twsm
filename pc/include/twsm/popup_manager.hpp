@@ -25,7 +25,7 @@ namespace twsm
 
 	public:
 		popup_manager(QWidget& parent) :
-			m_parent{parent}
+			m_parent(parent)
 		{ }
 
 		void update()
