@@ -7,9 +7,11 @@
 #define TWSM_ECON_HPP
 
 
+#include "popup_manager.hpp"
 #include "ui_main_window.h"
 
 #include <twl/network/network.hpp>
+#include <mlk/types/types.h>
 
 #include <QObject>
 
@@ -24,13 +26,15 @@ namespace twsm
 		Q_OBJECT
 
 		Ui::main_window& m_ui;
+		popup_manager& m_popupmgr;
 
 		std::map<std::size_t, twl::econ_client> m_clients;
 		mlk::uint m_current_id{0};
 
 	public:
-		econ(Ui::main_window& ui) :
-			m_ui{ui}
+		econ(Ui::main_window& ui, popup_manager& pm) :
+			m_ui(ui),
+			m_popupmgr(pm)
 		{ }
 
 		void update()
@@ -41,9 +45,11 @@ namespace twsm
 
 		void init()
 		{
+			// static objects
 			QObject::connect(m_ui.m_cb_ec_servers, SIGNAL(currentIndexChanged(int)), this, SLOT(switch_server(int)));
-
 			QObject::connect(m_ui.m_pb_ec_connect, SIGNAL(clicked()), this, SLOT(connect()));
+
+			// main page
 			QObject::connect(m_ui.m_pb_ec_change_map, SIGNAL(clicked()), this, SLOT(send_map_change()));
 			QObject::connect(m_ui.m_pb_ec_reload_map, SIGNAL(clicked()), this, SLOT(send_reload_map()));
 			QObject::connect(m_ui.m_pb_ec_start_recording, SIGNAL(clicked()), this, SLOT(send_start_recording()));
@@ -53,6 +59,9 @@ namespace twsm
 			QObject::connect(m_ui.m_pb_ec_send_chatmsg, SIGNAL(clicked()), this, SLOT(send_chat()));
 			QObject::connect(m_ui.m_pb_ec_send_custom_cmd, SIGNAL(clicked()), this, SLOT(send_custom_cmd()));
 			QObject::connect(m_ui.m_pb_ec_shutdown, SIGNAL(clicked()), this, SLOT(send_shutdown()));
+
+			// players page
+			QObject::connect(m_ui.m_pb_ec_refresh_palyers, SIGNAL(clicked()), this, SLOT(request_playerinfo()));
 		}
 
 		void connect(const mlk::ntw::ip_address& addr, const std::string& passwd)
@@ -71,28 +80,7 @@ namespace twsm
 
 			// not connected, client needs connection and login
 			else
-			{
-				// create new client
-				m_clients.emplace(m_current_id, addr);
-				auto& cl(m_clients[m_current_id]);
-				cl.on_log_added =
-				[this, id = m_current_id](const std::string& str)
-				{
-					if((m_ui.m_cb_ec_servers->currentIndex() == 0) ||
-					   (m_ui.m_cb_ec_servers->currentData().toInt() != static_cast<int>(id)))
-						return;
-
-					m_ui.m_te_ec_log->moveCursor(QTextCursor::End);
-					m_ui.m_te_ec_log->insertPlainText(str.c_str());
-					m_ui.m_te_ec_log->moveCursor(QTextCursor::End);
-				};
-				cl.on_connection = [this, id = m_current_id]{this->_on_connection(id);};
-				cl.on_login = [this, id = m_current_id]{this->_on_login(id);};
-				cl.on_connection_timeout = []{std::cout << "timeout" << std::endl;};
-				cl.login(passwd);
-				++m_current_id;
-
-			}
+				this->create_new_client(addr, passwd);
 		}
 
 		void send_command(const twl::econ_command& cmd)
@@ -113,8 +101,41 @@ namespace twsm
 		}
 
 	private:
+		void create_new_client(const mlk::ntw::ip_address& addr, const std::string& passwd)
+		{
+			// create new client
+			m_clients.emplace(m_current_id, addr);
+			auto& cl(m_clients[m_current_id]);
+
+			// setup the events
+			cl.on_log_added = [this, id = m_current_id](const std::string& str){this->_on_log_added(id, str);};
+			cl.on_connection = [this, id = m_current_id]{this->_on_connection(id);};
+			cl.on_login = [this, id = m_current_id]{this->_on_login(id);};
+			cl.on_connection_timeout = [this, id = m_current_id]{this->_on_connection_timeout(id);};
+			cl.on_connection_lost = [this, id = m_current_id]{this->_on_connection_lost(id);};
+			cl.on_playerinfo = [this, id = m_current_id](const twl::econ_player_infos& i){this->_on_playerinfo(id, i);};
+
+			// login
+			cl.login(passwd);
+			++m_current_id;
+		}
+
+		// on client events
+		void _on_log_added(mlk::uint id, const std::string& str)
+		{
+			// check if we need to log (is the 'id' the current active server?)
+			if(!this->is_current_active(id))
+				return;
+
+			m_ui.m_te_ec_log->moveCursor(QTextCursor::End);
+			m_ui.m_te_ec_log->insertPlainText(str.c_str());
+			m_ui.m_te_ec_log->moveCursor(QTextCursor::End);
+		}
+
 		void _on_connection(mlk::uint id)
 		{
+			m_popupmgr.create_popup<popup_type::info>("Econ connected to " + this->addr_from_id(id));
+
 			for(auto i(1); i < m_ui.m_cb_ec_servers->count(); ++i)
 				if(m_ui.m_cb_ec_servers->itemData(i).toInt() == static_cast<int>(id))
 				{
@@ -123,7 +144,6 @@ namespace twsm
 					return;
 				}
 
-
 			// new connection
 			m_ui.m_cb_ec_servers->addItem(m_clients[id].address().to_string().c_str(), id);
 			m_ui.m_cb_ec_servers->setCurrentIndex(m_ui.m_cb_ec_servers->count() - 1);
@@ -131,18 +151,81 @@ namespace twsm
 
 		void _on_login(mlk::uint id)
 		{
-
+			m_popupmgr.create_popup<popup_type::info>("Econ logged in on " + this->addr_from_id(id));
 		}
 
+		void _on_connection_timeout(mlk::uint id)
+		{
+			m_popupmgr.create_popup<popup_type::warning>("Connection attempt timed out for " + this->addr_from_id(id));
+		}
+
+		void _on_connection_lost(mlk::uint id)
+		{
+			m_popupmgr.create_popup<popup_type::error>("Connection to " + this->addr_from_id(id) + " lost", 5000);
+		}
+
+		void _on_playerinfo(mlk::uint id, const twl::econ_player_infos&)
+		{
+			if(!this->is_current_active(id))
+				return;
+			this->load_playerinfos_to_table();
+		}
+
+
+		// utils
+		bool is_current_active(mlk::uint id)
+		{
+			return ((m_ui.m_cb_ec_servers->currentIndex() != 0) &&
+					(m_ui.m_cb_ec_servers->currentData().toInt() == static_cast<int>(id)));
+		}
+
+		std::string addr_from_id(mlk::uint id) const
+		{return m_clients.at(id).address().to_string();}
+
+
 	private slots:
+		// ui events
 		void switch_server(int index)
 		{
-			if(index == 0)
+			// load last playerinfos
+			this->load_playerinfos_to_table();
+
+			if(index <= 0)
 				return;
+
 			auto id(m_ui.m_cb_ec_servers->itemData(index).toInt());
 
 			// switch server, reset ui
 			m_ui.m_te_ec_log->setText(m_clients[id].log().c_str());
+		}
+
+		void load_playerinfos_to_table()
+		{
+			m_ui.m_tw_ec_players->clearContents();
+			m_ui.m_tw_ec_players->setRowCount(0);
+
+			if(m_ui.m_cb_ec_servers->currentIndex() == 0)
+				return;
+
+			// get needed infos
+			auto id(m_ui.m_cb_ec_servers->currentData().toInt());
+			const auto& infos(m_clients[id].last_playerinfos());
+
+			// insert...
+			for(const auto& a : infos)
+			{
+				auto row(m_ui.m_tw_ec_players->rowCount());
+				m_ui.m_tw_ec_players->insertRow(row);
+
+				auto* id(new QTableWidgetItem{a.id().c_str()});
+				auto* name(new QTableWidgetItem{a.name().c_str()});
+				auto* score(new QTableWidgetItem{a.score().c_str()});
+				auto* addr(new QTableWidgetItem{a.addr().c_str()});
+				m_ui.m_tw_ec_players->setItem(row, 0, id);
+				m_ui.m_tw_ec_players->setItem(row, 1, name);
+				m_ui.m_tw_ec_players->setItem(row, 2, score);
+				m_ui.m_tw_ec_players->setItem(row, 3, addr);
+			}
 		}
 
 		void connect()
@@ -174,6 +257,19 @@ namespace twsm
 
 		void send_shutdown()
 		{this->send_command("shutdown");}
+
+		void request_playerinfo()
+		{
+			if(m_ui.m_cb_ec_servers->currentIndex() == 0)
+				return;
+
+			// clear old infos
+			m_ui.m_tw_ec_players->clearContents();
+			m_ui.m_tw_ec_players->setRowCount(0);
+
+			auto id(m_ui.m_cb_ec_servers->currentData().toInt());
+			m_clients[id].request_playerinfo();
+		}
 	};
 }
 
