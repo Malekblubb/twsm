@@ -7,6 +7,7 @@
 #define TWSM_SERVER_BROWSER
 
 
+#include "popup_manager.hpp"
 #include "ui_main_window.h"
 
 #include <mlk/log/log.h>
@@ -28,6 +29,7 @@ namespace twsm
 		Q_OBJECT
 
 		Ui::main_window& m_ui;
+		popup_manager& m_popupmgr;
 
 		twl::master_server m_masters;
 		twl::game_server m_servers;
@@ -37,8 +39,9 @@ namespace twsm
 		bool m_refreshing_masters{false}, m_refreshing{false};
 
 	public:
-		server_browser(Ui::main_window& ui) :
-			m_ui{ui}
+		server_browser(Ui::main_window& ui, popup_manager& pm) :
+			m_ui(ui),
+			m_popupmgr(pm)
 		{ }
 
 		void update()
@@ -130,6 +133,7 @@ namespace twsm
 
 			m_ui.m_tw_srvb_list->setSortingEnabled(true);
 			m_ui.m_lb_srvb_status->setText("Servers refreshed.");
+			m_popupmgr.create_popup<popup_type::info>("Serverlist refreshed");
 			mlk::lout("server_browser") << "ui took " << m_stopwatch.elapsed_time() - tm << " ms.";
 		}
 	};
