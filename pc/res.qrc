@@ -3,5 +3,6 @@
         <file>data/twsm.png</file>
         <file>data/arrow8.png</file>
         <file>data/arrow_up8.png</file>
+        <file>data/logo.png</file>
     </qresource>
 </RCC>
