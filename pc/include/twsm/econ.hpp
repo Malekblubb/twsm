@@ -62,6 +62,13 @@ namespace twsm
 
 			// players page
 			QObject::connect(m_ui.m_pb_ec_refresh_palyers, SIGNAL(clicked()), this, SLOT(request_playerinfo()));
+			QObject::connect(m_ui.m_pb_ec_kick_player, SIGNAL(clicked()), this, SLOT(kick_player()));
+			QObject::connect(m_ui.m_pb_ec_ban_player, SIGNAL(clicked()), this, SLOT(ban_player()));
+			QObject::connect(m_ui.m_pb_ec_permban_name, SIGNAL(clicked()), this, SLOT(permban_player()));
+
+			// ban page
+			QObject::connect(m_ui.m_pb_ec_ban_ip, SIGNAL(clicked()), this, SLOT(ban_ip()));
+			QObject::connect(m_ui.m_pb_ec_unban_ip, SIGNAL(clicked()), this, SLOT(unban_ip()));
 		}
 
 		void connect(const mlk::ntw::ip_address& addr, const std::string& passwd)
@@ -269,6 +276,41 @@ namespace twsm
 
 			auto id(m_ui.m_cb_ec_servers->currentData().toInt());
 			m_clients[id].request_playerinfo();
+		}
+
+		void kick_player()
+		{
+			for(auto& a : m_ui.m_tw_ec_players->selectedItems())
+			{
+				if(a->column() != 0)
+					continue;
+				this->send_command("kick " + a->text().toStdString());
+			}
+		}
+
+		void ban_player()
+		{
+			for(auto& a : m_ui.m_tw_ec_players->selectedItems())
+			{
+				if(a->column() != 0)
+					continue;
+				this->send_command(QString{"ban %1 %2 %3"}.arg(a->text()).arg(m_ui.m_sb_ec_bantime->text()).arg(m_ui.m_le_ec_banreason->text()).toStdString());
+			}
+		}
+
+		void permban_player()
+		{
+			// TODO
+		}
+
+		void ban_ip()
+		{
+			// TODO
+		}
+
+		void unban_ip()
+		{
+			// TODO
 		}
 	};
 }
