@@ -9,6 +9,7 @@
 
 #include "popup_manager.hpp"
 #include "ui_main_window.h"
+#include "servers_file.hpp"
 
 #include <twl/network/network.hpp>
 #include <mlk/types/types.h>
@@ -26,16 +27,24 @@ namespace twsm
 		Q_OBJECT
 
 		Ui::main_window& m_ui;
+		servers_file& m_serversfile;
 		popup_manager& m_popupmgr;
 
 		std::map<std::size_t, twl::econ_client> m_clients;
 		mlk::uint m_current_id{0};
 
 	public:
-		econ(Ui::main_window& ui, popup_manager& pm) :
+		econ(Ui::main_window& ui, servers_file& sf, popup_manager& pm) :
 			m_ui(ui),
+			m_serversfile(sf),
 			m_popupmgr(pm)
 		{ }
+
+		~econ()
+		{
+			for(auto i(1); i < m_ui.m_cb_ec_servers->count(); ++i)
+				m_serversfile.add_ip(m_ui.m_cb_ec_servers->itemText(i).toStdString());
+		}
 
 		void update()
 		{
@@ -45,6 +54,13 @@ namespace twsm
 
 		void init()
 		{
+			// load saved servers
+			for(const auto& a : m_serversfile.server_ips())
+			{
+				m_ui.m_cb_ec_servers->addItem(a.c_str(), m_current_id);
+				this->create_new_client<false>(a, "");
+			}
+
 			// static objects
 			QObject::connect(m_ui.m_cb_ec_servers, SIGNAL(currentIndexChanged(int)), this, SLOT(switch_server(int)));
 			QObject::connect(m_ui.m_pb_ec_connect, SIGNAL(clicked()), this, SLOT(connect()));
@@ -104,10 +120,13 @@ namespace twsm
 				// get id (index != id)
 				auto id(m_ui.m_cb_ec_servers->itemData(index).toInt());
 				m_clients[id].send_command(cmd);
+				std::cout << id << std::endl;
+				std::cout << m_clients[id].address() << std::endl;
 			}
 		}
 
 	private:
+		template<bool login = true>
 		void create_new_client(const mlk::ntw::ip_address& addr, const std::string& passwd)
 		{
 			// create new client
@@ -123,7 +142,8 @@ namespace twsm
 			cl.on_playerinfo = [this, id = m_current_id](const twl::econ_player_infos& i){this->_on_playerinfo(id, i);};
 
 			// login
-			cl.login(passwd);
+			if(login)
+				cl.login(passwd);
 			++m_current_id;
 		}
 
@@ -144,7 +164,7 @@ namespace twsm
 			m_popupmgr.create_popup<popup_type::info>("Econ connected to " + this->addr_from_id(id));
 
 			for(auto i(1); i < m_ui.m_cb_ec_servers->count(); ++i)
-				if(m_ui.m_cb_ec_servers->itemData(i).toInt() == static_cast<int>(id))
+				if(m_ui.m_cb_ec_servers->itemData(i) == static_cast<int>(id))
 				{
 					// we were already connected, choose right item
 					m_ui.m_cb_ec_servers->setCurrentIndex(i);
@@ -183,7 +203,7 @@ namespace twsm
 		bool is_current_active(mlk::uint id)
 		{
 			return ((m_ui.m_cb_ec_servers->currentIndex() != 0) &&
-					(m_ui.m_cb_ec_servers->currentData().toInt() == static_cast<int>(id)));
+					(m_ui.m_cb_ec_servers->itemData(m_ui.m_cb_ec_servers->currentIndex()).toInt() == static_cast<int>(id)));
 		}
 
 		std::string addr_from_id(mlk::uint id) const
@@ -202,7 +222,13 @@ namespace twsm
 
 			auto id(m_ui.m_cb_ec_servers->itemData(index).toInt());
 
-			// switch server, reset ui
+			// set ui
+			// host, port
+			mlk::ntw::ip_address asip{m_ui.m_cb_ec_servers->itemText(index).toStdString()};
+			m_ui.m_le_ec_host->setText(asip.ip().c_str());
+			m_ui.m_sb_ec_port->setValue(asip.port<int>());
+
+			// log
 			m_ui.m_te_ec_log->setText(m_clients[id].log().c_str());
 		}
 
@@ -215,7 +241,7 @@ namespace twsm
 				return;
 
 			// get needed infos
-			auto id(m_ui.m_cb_ec_servers->currentData().toInt());
+			auto id(m_ui.m_cb_ec_servers->itemData(m_ui.m_cb_ec_servers->currentIndex()).toInt());
 			const auto& infos(m_clients[id].last_playerinfos());
 
 			// insert...
@@ -274,7 +300,7 @@ namespace twsm
 			m_ui.m_tw_ec_players->clearContents();
 			m_ui.m_tw_ec_players->setRowCount(0);
 
-			auto id(m_ui.m_cb_ec_servers->currentData().toInt());
+			auto id(m_ui.m_cb_ec_servers->itemData(m_ui.m_cb_ec_servers->currentIndex()).toInt());
 			m_clients[id].request_playerinfo();
 		}
 
