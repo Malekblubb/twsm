@@ -3,8 +3,8 @@
 // See LICENSE for more information.
 //
 
-#ifndef TWSM_SERVER_BROWSER
-#define TWSM_SERVER_BROWSER
+#ifndef TWSM_SERVER_BROWSER_HPP
+#define TWSM_SERVER_BROWSER_HPP
 
 
 #include "popup_manager.hpp"
@@ -140,5 +140,5 @@ namespace twsm
 }
 
 
-#endif // TWSM_SERVER_BROWSER
+#endif // TWSM_SERVER_BROWSER_HPP
 
