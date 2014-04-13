@@ -11,6 +11,7 @@
 #include "popup_manager.hpp"
 #include "serverbrowser.hpp"
 #include "ui_main_window.h"
+#include "servers_file.hpp"
 
 #include <QMainWindow>
 #include <QTimer>
@@ -28,10 +29,11 @@ namespace twsm
 
 		Ui::main_window* m_ui{new Ui::main_window};
 
+		servers_file m_serversfile{"./twsm_servers"};
 		popup_manager m_popupmgr{*this};
 
 		server_browser m_srvbrowser{*m_ui, m_popupmgr};
-		econ m_econ{*m_ui, m_popupmgr};
+		econ m_econ{*m_ui, m_serversfile, m_popupmgr};
 
 		QTimer m_updatetimer;
 
